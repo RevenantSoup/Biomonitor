@@ -7,6 +7,9 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
+# -----------------------------
+# Page setup
+# -----------------------------
 st.set_page_config(
     page_title="Bio-Monitor Alert System",
     layout="wide",
@@ -89,6 +92,9 @@ st.markdown(
 )
 
 
+# -----------------------------
+# Clinical thresholds
+# -----------------------------
 THRESHOLDS = {
     "low_heart_rate": 50,
     "high_heart_rate": 120,
@@ -104,6 +110,9 @@ PATIENT_BASELINES = {
 }
 
 
+# -----------------------------
+# Data generation
+# -----------------------------
 def clamp(value, low, high):
     return max(low, min(high, value))
 
@@ -170,6 +179,7 @@ def simulate_next_reading():
                 systolic += np.random.uniform(18, 30)
                 diastolic += np.random.uniform(8, 14)
 
+        # Keep values inside broad physiological limits for a clean simulation
         heart = clamp(heart, 38, 150)
         oxygen = clamp(oxygen, 84, 100)
         systolic = clamp(systolic, 90, 180)
@@ -250,6 +260,9 @@ def line_chart(patient_data, y_column, title, y_title, threshold=None):
     return fig
 
 
+# -----------------------------
+# Initialize session state
+# -----------------------------
 if "vital_data" not in st.session_state:
     np.random.seed(42)
     st.session_state.vital_data = create_starting_data()
@@ -257,6 +270,9 @@ if "vital_data" not in st.session_state:
     st.session_state.active_event = None
 
 
+# -----------------------------
+# Sidebar controls
+# -----------------------------
 with st.sidebar:
     st.header("Simulation Controls")
     auto_refresh = st.toggle("Run live simulation", value=True)
@@ -270,6 +286,9 @@ with st.sidebar:
         st.rerun()
 
 
+# -----------------------------
+# Main dashboard
+# -----------------------------
 st.markdown('<div class="main-title">Bio-Monitor Alert System</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">Real-time simulated hospital dashboard for monitoring heart rate, oxygen saturation, and blood pressure.</div>',
@@ -301,6 +320,7 @@ else:
         unsafe_allow_html=True,
     )
 
+# Patient cards
 cols = st.columns(3)
 
 for col, (_, row) in zip(cols, latest.iterrows()):
@@ -330,6 +350,7 @@ for col, (_, row) in zip(cols, latest.iterrows()):
 
 st.divider()
 
+# Charts for all patients, no switching required
 for patient in sorted(data["Patient"].unique()):
     patient_data = data[data["Patient"] == patient].sort_values("Time")
 

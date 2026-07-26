@@ -225,6 +225,57 @@ def line_chart(patient_data, y_column, title, y_title, threshold):
     return fig
 
 
+def blood_pressure_chart(patient_data):
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=patient_data["Time"],
+            y=patient_data["Systolic BP (mmHg)"],
+            mode="lines+markers",
+            name="Systolic BP",
+            line=dict(width=3),
+            marker=dict(size=5),
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=patient_data["Time"],
+            y=patient_data["Diastolic BP (mmHg)"],
+            mode="lines+markers",
+            name="Diastolic BP",
+            line=dict(width=3),
+            marker=dict(size=5),
+        )
+    )
+
+    fig.add_hline(
+        y=150,
+        line_dash="dash",
+        annotation_text="Systolic threshold: 150",
+        annotation_position="top left",
+    )
+
+    fig.add_hline(
+        y=95,
+        line_dash="dash",
+        annotation_text="Diastolic threshold: 95",
+        annotation_position="bottom left",
+    )
+
+    fig.update_layout(
+        title="Blood Pressure Over Time",
+        height=260,
+        margin=dict(l=20, r=20, t=45, b=20),
+        xaxis_title="Time",
+        yaxis_title="Blood Pressure (mmHg)",
+        legend=dict(orientation="h"),
+    )
+
+    return fig
+
+
 if "vital_data" not in st.session_state:
     np.random.seed(42)
     st.session_state.vital_data = create_starting_data()
@@ -298,7 +349,7 @@ for patient in sorted(data["Patient"].unique()):
     patient_data = data[data["Patient"] == patient].sort_values("Time")
     st.subheader(patient)
 
-    chart_columns = st.columns(2)
+    chart_columns = st.columns(3)
 
     with chart_columns[0]:
         st.plotly_chart(
@@ -321,6 +372,12 @@ for patient in sorted(data["Patient"].unique()):
                 "Oxygen Saturation (%)",
                 92,
             ),
+            use_container_width=True,
+        )
+
+    with chart_columns[2]:
+        st.plotly_chart(
+            blood_pressure_chart(patient_data),
             use_container_width=True,
         )
 
